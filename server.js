@@ -121,7 +121,9 @@ app.post('/gerar-pdf', async (req, res) => {
     const brasaoBufferPng = await removeWhiteBackground(brasaoBuffer);
     const brasaoDataURL1 = `data:image/png;base64,${brasaoBufferPng.toString('base64')}`;
 
-    const browser = await puppeteer.launch();
+    const browser = await puppeteer.launch({
+      args: ['--no-sandbox', '--disable-setuid-sandbox']
+    });
     const page = await browser.newPage();
 
     // Convertendo bytes da imagem para uma URL de dados (data URL)
@@ -317,7 +319,6 @@ app.post('/gerar-pdf', async (req, res) => {
       format: 'A4',
       margin: { top: '50px', bottom: '50px', right: '70px', left: '70px' },
       scale: 0.6,
-      args: ['--no-sandbox', '--disable-setuid-sandbox'],
     });
 
     await browser.close();
@@ -332,5 +333,5 @@ app.post('/gerar-pdf', async (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log(`Servidor rodando em http://server:${port}`);
+  console.log(`Servidor rodando em http://serverAWS:${port}`);
 });
