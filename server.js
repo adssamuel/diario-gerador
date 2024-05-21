@@ -4,10 +4,14 @@ const puppeteer = require('puppeteer');
 const Jimp = require('jimp');
 
 const app = express();
-const port = 3000;
+const port = 3333;
 
 // Configurar o middleware para processar o corpo da requisição como JSON
 app.use(bodyParser.json());
+
+app.get('/', (request,response)=>  {
+  return response.json({message: 'Server is UP'});
+});
 
 app.post('/gerar-pdf', async (req, res) => {
   try {
