@@ -317,6 +317,7 @@ app.post('/gerar-pdf', async (req, res) => {
       format: 'A4',
       margin: { top: '50px', bottom: '50px', right: '70px', left: '70px' },
       scale: 0.6,
+      args: ['--no-sandbox', '--disable-setuid-sandbox'],
     });
 
     await browser.close();
@@ -331,5 +332,5 @@ app.post('/gerar-pdf', async (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log(`Servidor rodando em http://localhost:${port}`);
+  console.log(`Servidor rodando em http://server:${port}`);
 });
