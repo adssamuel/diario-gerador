@@ -429,5 +429,5 @@ app.post('/gerar-pdf', async (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log(`Servidor rodando em http://serverAWS:${port}`);
+  console.log(`Servidor rodando em http://serverAWS versão 14:22:${port}`);
 });
