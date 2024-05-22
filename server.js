@@ -1,10 +1,13 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const puppeteer = require('puppeteer');
+const fs = require('fs');
 const Jimp = require('jimp');
 
+const path = require('path');
+
 const app = express();
-const port = 3333;
+const port = 3000;
 
 // Configurar o middleware para processar o corpo da requisição como JSON
 app.use(bodyParser.json());
@@ -82,7 +85,7 @@ app.post('/gerar-pdf', async (req, res) => {
 
     }
 
-    console.log("tm M: " + nmMunicipio.length)
+    console.log("tm M: " + nmMunicipio.length);
 
     function detectImageType(bytes) {//Detecta tipo imagem
       if (bytes[0] === -1 && bytes[1] === -40) {
@@ -129,6 +132,16 @@ app.post('/gerar-pdf', async (req, res) => {
     // Convertendo bytes da imagem para uma URL de dados (data URL)
     const brasaoDataURL = `data:image/jpeg;base64,${brasao.toString('base64')}`;
 
+    
+
+    
+  // Carregar a fonte personalizada
+  //const byteFTimes = fs.readFileSync(path.join(__dirname, 'fonts', 'times.ttf'));
+    
+  //const byteFSerif = fs.readFileSync(path.join(__dirname, 'fonts', 'serife.ttf'));
+ // const byteFSSerif = fs.readFileSync(path.join(__dirname, 'fonts', 'sserife.ttf'));
+  //const byteFMonospace = fs.readFileSync(path.join(__dirname, 'fonts', 'cour.ttf'));
+
     // Definir o CSS para o cabeçalho
     const headerCss = `
         <style>
@@ -137,7 +150,77 @@ app.post('/gerar-pdf', async (req, res) => {
           padding: 0px;
           text-align: left;
         }
-       
+
+        @font-face {
+          font-family: 'FontTimes';
+          src: url('/fonts/times.ttf') format('truetype');
+          font-weight: normal;
+          font-style: normal;
+        }
+        
+        @font-face {
+          font-family: 'FontTimes';
+          src: url('/fonts/timesbd.ttf') format('truetype');
+          font-weight: bold;
+          font-style: normal;
+        }
+
+        @font-face {
+          font-family: 'Century';
+          src: url('/fonts/CENSCBK.ttf') format('truetype');
+          font-weight: normal;
+          font-style: normal;
+        }
+        
+        @font-face {
+          font-family: 'Century';
+          src: url('/fonts/SCHLBKB.ttf') format('truetype');
+          font-weight: bold;
+          font-style: normal;
+        }
+
+        @font-face {
+          font-family: 'Boldoni';
+          src: url('/fonts/BOD_R.ttf') format('truetype');
+          font-weight: normal;
+          font-style: normal;
+        }
+        
+        @font-face {
+          font-family: 'Boldoni';
+          src: url('/fonts/BOD_B.ttf') format('truetype');
+          font-weight: bold;
+          font-style: normal;
+        }
+
+        @font-face {
+          font-family: 'Arial';
+          src: url('/fonts/arial.ttf') format('truetype');
+          font-weight: normal;
+          font-style: normal;
+        }
+        
+        @font-face {
+          font-family: 'Arial';
+          src: url('/fonts/arialbd.ttf') format('truetype');
+          font-weight: bold;
+          font-style: normal;
+        }
+
+        @font-face {
+          font-family: 'FontCour';
+          src: url('/fonts/cour.ttf') format('truetype');
+          font-weight: normal;
+          font-style: normal;
+        }
+        
+        @font-face {
+          font-family: 'FontCour';
+          src: url('/fonts/courbd.ttf') format('truetype');
+          font-weight: bold;
+          font-style: normal;
+        }
+                
         .logo-container {
           display: flex;
           justify-content: flex-start; /* Alinha os itens à esquerda */
@@ -150,7 +233,7 @@ app.post('/gerar-pdf', async (req, res) => {
           font-size: ${tmFonte};
           line-height: ${escalYLogo};
           text-decoration: none;
-          font-family: Times, Arial, sans-serif;
+          font-family: 'Boldoni';
           font-weight: bold !important;
           display: inline-block;
           transform-origin: left; /* Define a origem da transformação */
@@ -188,7 +271,7 @@ app.post('/gerar-pdf', async (req, res) => {
           font-size: 20px;
           text-decoration: none;
           width: 48%;
-          font-family: 'Arial', sans-serif !important;
+          font-family: Arial, sans-serif !important;
         }
     
         .linha {
@@ -211,6 +294,19 @@ app.post('/gerar-pdf', async (req, res) => {
           border-right: 2px solid #000; /* Adicione uma borda à direita de uma das colunas */
           color: #b3b3b3 !important;
         }
+
+        .ql-font-monospace {
+          font-family: 'FontCour', monospace;
+      }
+
+      .ql-font-serif{
+        font-family: 'FontTimes', serif;
+      }
+
+      .ql-font-SSerif{
+        font-family: 'Arial';
+      }
+            
       </style>
       `;
 
@@ -224,7 +320,7 @@ app.post('/gerar-pdf', async (req, res) => {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     ${headerCss}
  </head> 
-  <body>
+  <body class="ql-font-SSerif" >
     <header>
       <div class="logo-container">
         <a class="logo" href="#">${nmMunicipio}</a>
@@ -309,7 +405,7 @@ app.post('/gerar-pdf', async (req, res) => {
 
     html += `</div><div class="coluna" id="coluna2">`; // Fechar a primeira coluna e abrir a segunda
 
-    // console.log(html); // Aqui estamos imprimindo o HTML gerado no console
+    console.log(html); // Aqui estamos imprimindo o HTML gerado no console
 
     await page.setContent(html);
 
