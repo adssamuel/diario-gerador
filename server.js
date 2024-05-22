@@ -7,7 +7,7 @@ const Jimp = require('jimp');
 const path = require('path');
 
 const app = express();
-const port = 3000;
+const port = 3333;
 
 // Configurar o middleware para processar o corpo da requisição como JSON
 app.use(bodyParser.json());
