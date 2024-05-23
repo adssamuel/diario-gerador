@@ -7,13 +7,83 @@ const Jimp = require('jimp');
 const path = require('path');
 
 const app = express();
-const port = 3333;
+const port = 3000;
 
 // Configurar o middleware para processar o corpo da requisição como JSON
 app.use(bodyParser.json());
 
 app.get('/', (request,response)=>  {
   return response.json({message: 'Server is UP'});
+});
+
+async function detectImageType(bytes) {//Detecta tipo imagem
+  if (bytes[0] === 0xFF && bytes[1] === 0xD8) {
+    return 'JPEG';
+
+  } else {
+    return 'PNG';
+    
+  }
+}
+
+// Função para remover o fundo branco da imagem
+async function removeWhiteBackgroundIMG(jpegBuffer, redX, redY, tipoIMG) {
+  const image = await Jimp.read(jpegBuffer);
+
+  console.log(" diMens" + redX + " / " + redY)
+  // Redimensionar a imagem
+  if (redX != null, redY != null) {
+    image.resize(redX, redY);
+
+  }
+
+  image.scan(0, 0, image.bitmap.width, image.bitmap.height, function (x, y, idx) {
+    const red = this.bitmap.data[idx + 0];
+    const green = this.bitmap.data[idx + 1];
+    const blue = this.bitmap.data[idx + 2];
+    // Se o pixel for quase branco, tornar transparente
+    if (red > 240 && green > 240 && blue > 240) {
+      this.bitmap.data[idx + 3] = 0; // Define alpha como 0 (transparente)
+    }
+  });
+
+  // Converte a imagem para PNG para manter a transparência
+  let buffer = null;
+  if (tipoIMG == "JPEG") {
+    buffer = await image.getBufferAsync(Jimp.MIME_PNG);
+    
+  } else if (tipoIMG == "PNG") {
+    buffer = await image.getBufferAsync(Jimp.MIME_PNG);
+
+  } else {
+    buffer = await image.getBufferAsync(Jimp.MIME_PNG);
+
+  }
+
+  return buffer;
+}
+
+app.post('/tratar-JPEG', async (request, response)=>  {
+  try {
+    //const dados = request.body;
+    const brasao = request.body;
+
+    // Decodificar a imagem base64 para buffer
+    
+    console.log(" Imagem: " + brasao)
+    const tipoIMG = await detectImageType(brasao);
+    console.log("Tipo Imagem 1.0:  " + tipoIMG);
+    const brasaoBuffer = Buffer.from(brasao, 'base64');
+    
+    const brasaoBufferPng = await removeWhiteBackgroundIMG(brasaoBuffer, null, null, tipoIMG);
+    
+    console.log("Tipo Imagem 2.0:  " + await detectImageType(brasaoBufferPng));
+    response.send(brasaoBufferPng);
+
+  } catch (error) {
+    console.error('Erro ao gerar o PDF:', error);
+    response.status(500).send('Erro ao gerar o PDF');
+  }
 });
 
 app.post('/gerar-pdf', async (req, res) => {
@@ -87,53 +157,19 @@ app.post('/gerar-pdf', async (req, res) => {
 
     console.log("tm M: " + nmMunicipio.length);
 
-    function detectImageType(bytes) {//Detecta tipo imagem
-      if (bytes[0] === -1 && bytes[1] === -40) {
-        return 'JPEG';
-      } else {
-        return 'Desconhecido';
-      }
-    }
-
+    const tipoIMG = await detectImageType(brasao);
+    console.log("Tipo Imagem 1:  " + tipoIMG);
     // Decodificar a imagem base64 para buffer
     const brasaoBuffer = Buffer.from(brasao, 'base64');
+    console.log("Tipo Imagem 2:  " + detectImageType(brasao));
 
-    // Função para remover o fundo branco da imagem
-    async function removeWhiteBackground(jpegBuffer) {
-      const image = await Jimp.read(jpegBuffer);
-
-
-      // Redimensionar a imagem
-      image.resize(370, 370);
-
-      image.scan(0, 0, image.bitmap.width, image.bitmap.height, function (x, y, idx) {
-        const red = this.bitmap.data[idx + 0];
-        const green = this.bitmap.data[idx + 1];
-        const blue = this.bitmap.data[idx + 2];
-        // Se o pixel for quase branco, tornar transparente
-        if (red > 240 && green > 240 && blue > 240) {
-          this.bitmap.data[idx + 3] = 0; // Define alpha como 0 (transparente)
-        }
-      });
-
-      // Converte a imagem para PNG para manter a transparência
-      const buffer = await image.getBufferAsync(Jimp.MIME_PNG);
-      return buffer;
-    }
-
-    const brasaoBufferPng = await removeWhiteBackground(brasaoBuffer);
+    const brasaoBufferPng = await removeWhiteBackgroundIMG(brasaoBuffer, 370, 370, tipoIMG);
     const brasaoDataURL1 = `data:image/png;base64,${brasaoBufferPng.toString('base64')}`;
 
     const browser = await puppeteer.launch({
       args: ['--no-sandbox', '--disable-setuid-sandbox']
     });
     const page = await browser.newPage();
-
-    // Convertendo bytes da imagem para uma URL de dados (data URL)
-    const brasaoDataURL = `data:image/jpeg;base64,${brasao.toString('base64')}`;
-
-    
-
     
   // Carregar a fonte personalizada
   //const byteFTimes = fs.readFileSync(path.join(__dirname, 'fonts', 'times.ttf'));
@@ -363,7 +399,7 @@ app.post('/gerar-pdf', async (req, res) => {
               */
 
               html += itemMateria.ementa;
-              html += '<table style=\'border:2px solid black;\'><tr><th>coluna 1</th><th>coluna 2</th></tr><tr><td>Result 1</td><td>Result 2</td></tr></table>';
+          //    html += '<table style=\'border:2px solid black;\'><tr><th>coluna 1</th><th>coluna 2</th></tr><tr><td>Result 1</td><td>Result 2</td></tr></table>';
               html += '<ul>';
               html += itemMateria.preambulo;
               html += '<ul>';
@@ -405,7 +441,7 @@ app.post('/gerar-pdf', async (req, res) => {
 
     html += `</div><div class="coluna" id="coluna2">`; // Fechar a primeira coluna e abrir a segunda
 
-    console.log(html); // Aqui estamos imprimindo o HTML gerado no console
+    // console.log(html); // Aqui estamos imprimindo o HTML gerado no console
 
     await page.setContent(html);
 
