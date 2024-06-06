@@ -13,7 +13,8 @@ const app = express();
 app.use(bodyParser.json({ limit: '50mb' }));
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 
-const port = 3333;
+//const port = 3333;//serverAWS
+const port = 3000;//local
 
 // Configurar o middleware para processar o corpo da requisição como JSON
 app.use(bodyParser.json());
@@ -886,19 +887,14 @@ const headerWithScript = headerCss;
     const pdfBufferPg1 = await page.pdf(opcoesPuppPg1);
     const pdfBuffer = await page.pdf(opcoesPupp);
 
-    console.log("AKI :conbina1");
     // Combina os PDFs
     const firstPagePdf = await PDFDocument.load(pdfBufferPg1);
-    console.log("AKI :conbina2");
     const otherPagesPdf = await PDFDocument.load(pdfBuffer);
-    console.log("AKI :conbina3");
     const mergedPdf = await PDFDocument.create();
-    console.log("AKI :conbina4");
-
+    
   const copiedFirstPage = await mergedPdf.copyPages(firstPagePdf, [0]);
   copiedFirstPage.forEach((page) => mergedPdf.addPage(page));
-  console.log("AKI :gerou");
-
+ 
   const copiedOtherPages = await mergedPdf.copyPages(otherPagesPdf, otherPagesPdf.getPageIndices());
   copiedOtherPages.forEach((page) => mergedPdf.addPage(page));
     
