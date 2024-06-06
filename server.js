@@ -13,8 +13,8 @@ const app = express();
 app.use(bodyParser.json({ limit: '50mb' }));
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 
-//const port = 3333;//serverAWS
-const port = 3000;//local
+const port = 3333;//serverAWS
+//const port = 3000;//local
 
 // Configurar o middleware para processar o corpo da requisição como JSON
 app.use(bodyParser.json());
