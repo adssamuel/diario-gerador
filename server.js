@@ -919,5 +919,5 @@ const headerWithScript = headerCss;
 });
 
 app.listen(port, () => {
-  console.log(`Servidor rodando em http://serverAWS versão 14:22:${port}`);
+  console.log(`Servidor rodando em http://serverAWS versão 07/06 08:24:${port}`);
 });
